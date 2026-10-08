@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Duc in Altum - SNS</title>
+<meta name="theme-color" content="#43433D">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F6F8;--card:#fff;--ink:#23262B;--mute:#6B7280;--line:#E5E8EC;--gold:#E5A800;--gold-soft:#FFF4CC;--dark:#43433D;--ok:#1F8A4C;--ok-soft:#E3F4EA;--warn:#B45309;--warn-soft:#FEF0DC;--r:14px}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;padding-top:env(safe-area-inset-top)}
+header{background:var(--card);border-bottom:1px solid var(--line)}
+.bar{max-width:1040px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--dark);flex:none}
+.logo-fb{width:44px;height:44px;border-radius:50%;background:var(--dark);color:var(--gold);display:none;align-items:center;justify-content:center;font-size:1.4rem;flex:none}
+h1{font-size:1.1rem;font-weight:800}
+.badge{margin-left:auto;background:var(--gold-soft);color:#7A5900;border:1px solid #F1D98A;border-radius:99px;padding:6px 14px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer}
+nav{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.tabs{max-width:1040px;margin:0 auto;display:flex;overflow-x:auto;padding:0 10px;scrollbar-width:none}
+.tabs button{flex:none;background:none;border:0;border-bottom:3px solid transparent;font:inherit;font-size:.85rem;font-weight:600;color:var(--mute);padding:14px 14px;cursor:pointer;white-space:nowrap}
+.tabs button.on{color:var(--ink);border-color:var(--gold)}
+main{max-width:1040px;margin:0 auto;padding:20px 18px 60px}
+.view{display:none}.view.on{display:block}
+h2{font-size:1.05rem;font-weight:700;margin:26px 0 12px}
+h2:first-child{margin-top:0}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.stat b{display:block;font-size:2rem;font-weight:800;line-height:1.1}
+.stat span{color:var(--mute);font-size:.85rem}
+.stat{border-left:4px solid var(--gold)}
+.news h3,.role h3{font-size:1rem;font-weight:700;margin-bottom:4px}
+.news p,.role p{color:#4B5563;font-size:.9rem;white-space:pre-line}
+.meta{color:var(--mute);font-size:.78rem;margin-top:8px}
+label{display:block;font-size:.82rem;font-weight:600;margin:12px 0 5px}
+input,select,textarea{width:100%;font:inherit;font-size:.95rem;padding:11px 12px;border:1px solid #D3D8DE;border-radius:10px;background:#fff;color:var(--ink)}
+textarea{min-height:100px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #F5DC8A;outline-offset:1px;border-color:var(--gold)}
+.btn{background:var(--gold);color:#241B00;border:0;border-radius:10px;font:inherit;font-weight:700;padding:12px 18px;cursor:pointer;margin-top:16px}
+.btn:hover{background:#F0B400}
+.btn.sm{padding:7px 12px;margin:0;font-size:.8rem}
+.btn.ghost{background:#EEF0F3;color:var(--ink)}
+.btn.red{background:#FBE6E3;color:#9B2C20}
+.tag{display:inline-block;font-size:.72rem;font-weight:700;border-radius:99px;padding:3px 10px}
+.tag.wait{background:var(--warn-soft);color:var(--warn)}
+.tag.done{background:var(--ok-soft);color:var(--ok)}
+.item{border-top:1px solid var(--line);padding:14px 0}
+.item:first-child{border-top:0;padding-top:0}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.empty{color:var(--mute);font-size:.9rem;text-align:center;padding:18px 0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);background:var(--dark);color:#fff;padding:12px 20px;border-radius:99px;font-size:.88rem;transition:transform .25s;z-index:9}
+.toast.on{transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <img class="logo" id="logo" src="logo.png" alt="Logo Duc in Altum">
+  <div class="logo-fb" id="logoFb" aria-hidden="true">★</div>
+  <h1>Duc in Altum - SNS</h1>
+  <button class="badge" id="badge" title="Modifier le statut"></button>
+</div></header>
+<nav><div class="tabs" role="tablist">
+  <button data-v="home" class="on">Accueil &amp; Actualités</button>
+  <button data-v="report">Signalements &amp; Plaintes</button>
+  <button data-v="inscr">Inscriptions</button>
+  <button data-v="admin">Administration</button>
+</div></nav>
+
+<main>
+<!-- ACCUEIL -->
+<section id="v-home" class="view on">
+  <div class="grid g3">
+    <div class="card stat"><b id="sClasses">0</b><span>Classes actives</span></div>
+    <div class="card stat"><b id="sPlaintes">0</b><span>Plaintes reçues</span></div>
+    <div class="card stat"><b id="sNews">0</b><span>Actualités publiées</span></div>
+  </div>
+  <h2>Fil d'actualités</h2>
+  <div class="grid g2" id="newsFeed"></div>
+  <h2>La Cellule SNS de classe</h2>
+  <div class="grid g2">
+    <div class="card role"><h3>Chef de classe</h3><p>Dirige la cellule, veille au respect des règles et représente la classe auprès de l'école.</p></div>
+    <div class="card role"><h3>Secrétaire</h3><p>Consigne les rapports, tient la liste des présences et transmet les informations.</p></div>
+    <div class="card role"><h3>Brigadiers</h3><p>Surveillent la propreté et la discipline, et signalent les problèmes constatés.</p></div>
+    <div class="card role"><h3>Membres de la cellule</h3><p>Participent aux actions d'hygiène, de sensibilisation et de vie scolaire.</p></div>
+  </div>
+</section>
+
+<!-- SIGNALEMENTS -->
+<section id="v-report" class="view">
+  <div class="grid g2">
+    <form class="card" id="fReport">
+      <h2>Envoyer un signalement</h2>
+      <label for="rClasse">Classe concernée</label><select id="rClasse" required></select>
+      <label for="rNom">Nom du rapporteur</label><input id="rNom" required maxlength="80" autocomplete="name">
+      <label for="rType">Type de plainte</label>
+      <select id="rType" required>
+        <option>Déchets jetés par terre</option><option>Insalubrité</option><option>Matériel endommagé</option><option>Comportement</option><option>Autre</option>
+      </select>
+      <label for="rDesc">Description détaillée</label><textarea id="rDesc" required maxlength="800"></textarea>
+      <button class="btn" type="submit">Envoyer le signalement</button>
+    </form>
+    <div class="card"><h2>Suivi des plaintes</h2><div id="trackList"></div></div>
+  </div>
+</section>
+
+<!-- INSCRIPTIONS -->
+<section id="v-inscr" class="view">
+  <div class="grid g2">
+    <form class="card" id="fInscr">
+      <h2>Concours d'hygiène &amp; sensibilisation</h2>
+      <label for="iNom">Nom complet</label><input id="iNom" required maxlength="80" autocomplete="name">
+      <label for="iClasse">Classe</label><select id="iClasse" required></select>
+      <label for="iRole">Rôle / Engagement</label>
+      <select id="iRole" required>
+        <option>Participant au concours d'hygiène</option><option>Animateur de sensibilisation</option><option>Brigadier volontaire</option><option>Autre engagement</option>
+      </select>
+      <button class="btn" type="submit">M'inscrire</button>
+    </form>
+    <div class="card"><h2>Inscrits</h2><div id="inscrList"></div></div>
+  </div>
+</section>
+
+<!-- ADMIN -->
+<section id="v-admin" class="view">
+  <div class="grid g2">
+    <div class="card">
+      <h2>Classes actives</h2>
+      <label for="aClasses">Nombre de classes / cellules</label>
+      <input id="aClasses" type="number" min="1" max="200">
+      <button class="btn" id="bClasses">Enregistrer</button>
+    </div>
+    <form class="card" id="fNews">
+      <h2>Publier une actualité</h2>
+      <label for="nTitre">Titre</label><input id="nTitre" required maxlength="100">
+      <label for="nTexte">Contenu</label><textarea id="nTexte" required maxlength="1000"></textarea>
+      <button class="btn" type="submit">Publier</button>
+    </form>
+  </div>
+  <h2>Actualités publiées</h2>
+  <div class="card" id="adminNews"></div>
+  <h2>Gestion des plaintes</h2>
+  <div class="card">
+    <label for="aFilter" style="margin-top:0">Filtrer</label>
+    <select id="aFilter"><option value="all">Toutes</option><option value="wait">En attente</option><option value="done">Réglementées</option></select>
+    <div id="adminList" style="margin-top:12px"></div>
+  </div>
+</section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const KEY = 'sns-data-v1';
+const DEF = { classes: 12, badge: "Administrateur / Chargé d'École", news: [
+  { id: 1, t: "Bienvenue sur Duc in Altum - SNS", c: "Cette application réunit les signalements, les inscriptions et les actualités des Services Nationaux Scolaires.", d: Date.now() }
+], plaintes: [], inscr: [] };
+let S;
+try { S = Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = JSON.parse(JSON.stringify(DEF)); }
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast("Enregistrement local impossible."); } };
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = t => new Date(t).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2400); }
+
+/* logo de secours */
+$('#logo').onerror = function () { this.style.display = 'none'; $('#logoFb').style.display = 'flex'; };
+
+/* navigation */
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
+  scrollTo(0, 0);
+});
+
+/* statut modifiable */
+$('#badge').onclick = () => {
+  const v = prompt('Modifier le statut affiché :', S.badge);
+  if (v && v.trim()) { S.badge = v.trim().slice(0, 50); persist(); render(); }
+};
+
+/* rendu */
+function classOptions() {
+  return Array.from({ length: S.classes }, (_, i) => `<option>Classe ${i + 1}</option>`).join('');
+}
+function render() {
+  $('#badge').textContent = S.badge;
+  $('#sClasses').textContent = S.classes;
+  $('#sPlaintes').textContent = S.plaintes.length;
+  $('#sNews').textContent = S.news.length;
+  $('#aClasses').value = S.classes;
+  ['#rClasse', '#iClasse'].forEach(id => { const el = $(id), v = el.value; el.innerHTML = classOptions(); if (v) el.value = v; });
+
+  const news = [...S.news].sort((a, b) => b.d - a.d);
+  $('#newsFeed').innerHTML = news.length ? news.map(n => `<article class="card news"><h3>${esc(n.t)}</h3><p>${esc(n.c)}</p><div class="meta">${fmt(n.d)}</div></article>`).join('') : '<div class="card empty">Aucune actualité pour le moment.</div>';
+  $('#adminNews').innerHTML = news.length ? news.map(n => `<div class="item row"><div><b>${esc(n.t)}</b><div class="meta">${fmt(n.d)}</div></div><button class="btn sm red" data-delnews="${n.id}">Supprimer</button></div>`).join('') : '<div class="empty">Aucune actualité publiée.</div>';
+
+  const pl = [...S.plaintes].sort((a, b) => b.d - a.d);
+  $('#trackList').innerHTML = pl.length ? pl.map(p => `<div class="item"><div class="row"><b>${esc(p.classe)} · ${esc(p.type)}</b>${tag(p.s)}</div><p style="font-size:.9rem;margin-top:4px">${esc(p.desc)}</p><div class="meta">Par ${esc(p.nom)} · ${fmt(p.d)}</div></div>`).join('') : '<div class="empty">Aucun signalement envoyé.</div>';
+
+  const f = $('#aFilter').value, list = pl.filter(p => f === 'all' || p.s === f);
+  $('#adminList').innerHTML = list.length ? list.map(p => `<div class="item"><div class="row"><b>${esc(p.classe)} · ${esc(p.type)}</b>${tag(p.s)}</div><p style="font-size:.9rem;margin-top:4px">${esc(p.desc)}</p><div class="meta">Par ${esc(p.nom)} · ${fmt(p.d)}</div><div class="row" style="justify-content:flex-start;margin-top:10px"><button class="btn sm ${p.s === 'wait' ? '' : 'ghost'}" data-toggle="${p.id}">${p.s === 'wait' ? 'Marquer réglementé' : 'Remettre en attente'}</button><button class="btn sm red" data-delp="${p.id}">Supprimer</button></div></div>`).join('') : '<div class="empty">Aucune plainte dans cette catégorie.</div>';
+
+  $('#inscrList').innerHTML = S.inscr.length ? [...S.inscr].reverse().map(i => `<div class="item"><b>${esc(i.nom)}</b><div class="meta">${esc(i.classe)} · ${esc(i.role)} · ${fmt(i.d)}</div></div>`).join('') : '<div class="empty">Aucune inscription pour le moment.</div>';
+}
+const tag = s => s === 'done' ? '<span class="tag done">Réglementé</span>' : '<span class="tag wait">En attente</span>';
+
+/* formulaires */
+$('#fReport').onsubmit = e => {
+  e.preventDefault();
+  S.plaintes.push({ id: Date.now(), classe: $('#rClasse').value, nom: $('#rNom').value.trim(), type: $('#rType').value, desc: $('#rDesc').value.trim(), s: 'wait', d: Date.now() });
+  persist(); e.target.reset(); render(); toast('Signalement envoyé. Statut : en attente.');
+};
+$('#fInscr').onsubmit = e => {
+  e.preventDefault();
+  S.inscr.push({ nom: $('#iNom').value.trim(), classe: $('#iClasse').value, role: $('#iRole').value, d: Date.now() });
+  persist(); e.target.reset(); render(); toast('Inscription enregistrée.');
+};
+$('#fNews').onsubmit = e => {
+  e.preventDefault();
+  S.news.push({ id: Date.now(), t: $('#nTitre').value.trim(), c: $('#nTexte').value.trim(), d: Date.now() });
+  persist(); e.target.reset(); render(); toast('Actualité publiée.');
+};
+$('#bClasses').onclick = () => {
+  const n = parseInt($('#aClasses').value, 10);
+  if (!n || n < 1 || n > 200) return toast('Entrez un nombre entre 1 et 200.');
+  S.classes = n; persist(); render(); toast('Nombre de classes mis à jour.');
+};
+$('#aFilter').onchange = render;
+
+/* actions admin */
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.toggle) { const p = S.plaintes.find(x => x.id == b.dataset.toggle); p.s = p.s === 'wait' ? 'done' : 'wait'; }
+  else if (b.dataset.delp) { if (!confirm('Supprimer cette plainte ?')) return; S.plaintes = S.plaintes.filter(x => x.id != b.dataset.delp); }
+  else if (b.dataset.delnews) { if (!confirm('Supprimer cette actualité ?')) return; S.news = S.news.filter(x => x.id != b.dataset.delnews); }
+  else return;
+  persist(); render();
+});
+
+/* PWA */
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+render();
+</script>
+</body>
+</html>
